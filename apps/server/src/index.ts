@@ -6,4 +6,8 @@ app.get('/', (c) => {
   return c.text('Hello Hono!')
 })
 
-export default app
+app.get('/api/health', (c) => {
+  return c.json({ status: 'ok' })
+})
+
+Bun.serve({port: 8787, fetch: app.fetch})
