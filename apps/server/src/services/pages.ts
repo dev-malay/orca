@@ -1,7 +1,7 @@
 import { db } from '../db'
 import type { Page, PageTreeNode } from '@repo/shared'
 
-interface PageRow {
+export interface PageRow {
   id: string
   space_id: string
   parent_id: string | null
@@ -12,7 +12,7 @@ interface PageRow {
   updated_at: number
 }
 
-function toTreeNode(row: PageRow): PageTreeNode {
+export function toTreeNode(row: PageRow): PageTreeNode {
   return {
     id: row.id,
     spaceId: row.space_id,

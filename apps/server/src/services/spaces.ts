@@ -1,14 +1,14 @@
 import { db } from '../db'
 import type { Space } from '@repo/shared'
 
-interface SpaceRow {
+export interface SpaceRow {
   id: string
   name: string
   created_at: number
   updated_at: number
 }
 
-function toSpace(row: SpaceRow): Space {
+export function toSpace(row: SpaceRow): Space {
   return {
     id: row.id,
     name: row.name,
