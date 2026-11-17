@@ -93,10 +93,10 @@ export function updatePage(
       }
       // moving a page under one of its own descendants would detach it from
       // the tree, so walk the candidate parent's ancestors and refuse on a cycle
-      let cursor = parent.parent_id
-      while (cursor !== null) {
-        if (cursor === id) return { ok: false, reason: 'CYCLE' }
-        cursor = getRow(cursor)?.parent_id ?? null
+      let ancestor = parent.parent_id
+      while (ancestor !== null) {
+        if (ancestor === id) return { ok: false, reason: 'CYCLE' }
+        ancestor = getRow(ancestor)?.parent_id ?? null
       }
     }
     parentId = next

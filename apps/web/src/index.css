@@ -1,14 +1,61 @@
 @import "tailwindcss";
 
-/* Class-based dark mode (toggled on <html> by theme.ts) */
-@custom-variant dark (&:where(.dark, .dark *));
-
-html,
-body,
-#root {
-  height: 100%;
+@theme {
+  --color-app: #14120b;
+  --color-fg: #edecec;
+  --color-fg-02: #d7d6d5;
+  --color-panel: #1b1913;
+  --color-panel-01: #1d1b15;
+  --color-panel-02: #201e18;
+  --color-panel-03: #26241e;
+  --color-panel-04: #2b2923;
+  --color-line: rgba(237, 236, 236, 0.1);
+  --color-line-soft: rgba(237, 236, 236, 0.025);
+  --color-line-strong: rgba(237, 236, 236, 0.2);
+  --color-line-bold: rgba(237, 236, 236, 0.6);
+  --color-sec: rgba(237, 236, 236, 0.6);
+  --color-mid: rgba(237, 236, 236, 0.5);
+  --color-ter: rgba(237, 236, 236, 0.4);
+  --color-accent: #f54e00;
+  --color-danger: #e05c7d;
+  --radius-xs: 4px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 8px;
+  --ease-spring: cubic-bezier(0.25, 1, 0.5, 1);
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-body {
-  @apply bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100;
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--color-app);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: rgba(237, 236, 236, 0.16);
+  }
+
+  button:focus-visible {
+    outline: 2px solid var(--color-fg);
+    outline-offset: 0.3ch;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(237, 236, 236, 0.14) transparent;
+  }
 }
