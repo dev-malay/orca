@@ -131,7 +131,7 @@ export function Sidebar({
       </nav>
 
       <div className="border-t border-line px-4 py-3">
-        <p className="text-xs text-ter">Dots arrive in Phase 2.</p>
+        <p className="text-xs text-ter">Agents arrive in Phase 2.</p>
       </div>
     </aside>
   )

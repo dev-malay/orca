@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import type { SearchResponse } from '@repo/shared'
+import { pageContentToPlainText } from '@repo/shared'
 import { db } from '../db'
 import { toSpace, type SpaceRow } from '../services/spaces'
 import { toTreeNode, type PageRow } from '../services/pages'
@@ -20,20 +21,26 @@ searchRoutes.get('/', (c) => {
     .query(`SELECT * FROM spaces WHERE name LIKE ? ${escape} ORDER BY updated_at DESC LIMIT 25`)
     .all(term) as SpaceRow[]
 
-  const pageRows = db
-    .query(
-      `SELECT p.*, s.name AS space_name
-       FROM pages p
-       JOIN spaces s ON s.id = p.space_id
-       WHERE p.title LIKE ? ${escape} OR p.content LIKE ? ${escape}
-       ORDER BY p.updated_at DESC
-       LIMIT 50`,
-    )
-    .all(term, term) as (PageRow & { space_name: string })[]
+  // content holds serialized rich JSON, so it is matched as extracted plain
+  // text here instead of raw LIKE, which would hit JSON keys and punctuation
+  const needle = raw.toLowerCase()
+  const pageRows = (
+    db
+      .query(
+        `SELECT p.*, s.name AS space_name
+        FROM pages p
+        JOIN spaces s ON s.id = p.space_id
+        ORDER BY p.updated_at DESC`,
+      )
+      .all() as (PageRow & { space_name: string })[]
+  ).filter((row) => {
+    if (row.title.toLowerCase().includes(needle)) return true
+    return pageContentToPlainText(row.content).toLowerCase().includes(needle)
+  })
 
   const result: SearchResponse = {
     spaces: spaceRows.map(toSpace),
-    pages: pageRows.map((row) => ({ ...toTreeNode(row), spaceName: row.space_name })),
+    pages: pageRows.slice(0, 50).map((row) => ({ ...toTreeNode(row), spaceName: row.space_name })),
   }
   return c.json(result)
 })
