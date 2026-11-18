@@ -64,4 +64,42 @@ export const SearchResponseSchema = z.object({
 
 export type SearchResponse = z.infer<typeof SearchResponseSchema>
 
+// forChat (P3)
+
+export const ThreadSchema = z.object({
+  id: z.string(),
+  agentId: z.string(),
+  title: z.string(),
+  createdAt: z.number(),
+  updatedAt: z.number()
+})
+
+export type Thread = z.infer<typeof ThreadSchema>
+
+export const MessageSchema = z.object({
+  id: z.string(),
+  threadId: z.string(),
+  role: z.enum(['user', 'assistant', 'system']),
+  content: z.string(),
+  createdAt: z.number()
+})
+
+export type Message = z.infer<typeof MessageSchema>
+
+export const CreateThreadInputSchema = z.object({
+  agentId: z.string().min(1),
+  title: z.string().trim().min(1).max(200).optional()
+})
+
+export type CreateThreadInput = z.infer<typeof CreateThreadInputSchema>
+
+export const SendMessageInputSchema = z.object({
+  threadId: z.string().min(1),
+  role: z.enum(['user', 'assistant', 'system']),
+  content: z.string().trim().min(1)
+})
+
+export type SendMessageInput = z.infer<typeof SendMessageInputSchema>
+
+
 
