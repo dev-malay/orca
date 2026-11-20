@@ -55,6 +55,102 @@ export const UpdatePageContentInputSchema = z.object({
 
 export type UpdatePageContentInput = z.infer<typeof UpdatePageContentInputSchema>
 
+// Rich content
+
+// pages.content holds a serialized TipTap document. Legacy pages still hold
+// plain markdown text, so every reader goes through parseRichContent and
+// falls back to treating the raw string as plain text when it is not a doc
+
+export type RichContentNode = {
+  type: string
+  text?: string
+  content?: RichContentNode[]
+}
+
+export type RichContentDoc = RichContentNode & { type: 'doc' }
+
+export const richContentNodeSchema: z.ZodType<RichContentNode> = z.lazy(() =>
+  z.looseObject({
+    type: z.string(),
+    text: z.string().optional(),
+    content: z.array(richContentNodeSchema).optional(),
+  }),
+)
+
+export const richContentDocSchema = z.looseObject({
+  type: z.literal('doc'),
+  content: z.array(richContentNodeSchema),
+})
+
+export function parseRichContent(content: string): RichContentDoc | null {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(content)
+  } catch {
+    return null
+  }
+  const result = richContentDocSchema.safeParse(parsed)
+  return result.success ? (result.data as RichContentDoc) : null
+}
+
+const blockTypes = new Set([
+  'paragraph',
+  'heading',
+  'blockquote',
+  'codeBlock',
+  'bulletList',
+  'orderedList',
+  'listItem',
+])
+
+function nodeText(node: RichContentNode): string {
+  if (node.type === 'text') return node.text ?? ''
+  const parts: string[] = []
+  for (const child of node.content ?? []) {
+    const text = nodeText(child)
+    if (text.length === 0) continue
+    // block children sit on their own line, inline children flow together
+    if (parts.length > 0 && blockTypes.has(child.type)) parts.push('\n')
+    parts.push(text)
+  }
+  return parts.join('')
+}
+
+export function richContentToPlainText(doc: RichContentDoc): string {
+  return nodeText(doc).trim()
+}
+
+export function pageContentToPlainText(content: string): string {
+  const doc = parseRichContent(content)
+  return doc ? richContentToPlainText(doc) : content
+}
+
+// Agents
+
+export const AgentSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  instructions: z.string(),
+  createdAt: z.number(),
+  updatedAt: z.number()
+})
+
+export type Agent = z.infer<typeof AgentSchema>
+
+export const CreateAgentInputSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  instructions: z.string().max(10000).optional()
+})
+
+export type CreateAgentInput = z.infer<typeof CreateAgentInputSchema>
+
+export const UpdateAgentInputSchema = z.object({
+  name: z.string().trim().min(1).max(200).optional(),
+  instructions: z.string().max(10000).optional()
+})
+
+export type UpdateAgentInput = z.infer<typeof UpdateAgentInputSchema>
+
 // Responses
 
 export const SearchResponseSchema = z.object({
@@ -64,7 +160,44 @@ export const SearchResponseSchema = z.object({
 
 export type SearchResponse = z.infer<typeof SearchResponseSchema>
 
-// Tools (P4)
+// Chat (Phase 3)
+
+export const ThreadSchema = z.object({
+  id: z.string(),
+  agentId: z.string(),
+  title: z.string(),
+  createdAt: z.number(),
+  updatedAt: z.number()
+})
+
+export type Thread = z.infer<typeof ThreadSchema>
+
+export const MessageSchema = z.object({
+  id: z.string(),
+  threadId: z.string(),
+  role: z.enum(['user', 'assistant', 'system']),
+  content: z.string(),
+  createdAt: z.number()
+})
+
+export type Message = z.infer<typeof MessageSchema>
+
+export const CreateThreadInputSchema = z.object({
+  agentId: z.string().min(1),
+  title: z.string().trim().min(1).max(200).optional()
+})
+
+export type CreateThreadInput = z.infer<typeof CreateThreadInputSchema>
+
+export const SendMessageInputSchema = z.object({
+  threadId: z.string().min(1),
+  role: z.enum(['user', 'assistant', 'system']),
+  content: z.string().trim().min(1)
+})
+
+export type SendMessageInput = z.infer<typeof SendMessageInputSchema>
+
+// Tools (Phase 4)
 
 export const ToolSchema = z.object({
   id: z.string(),

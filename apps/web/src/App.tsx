@@ -87,7 +87,7 @@ export default function App() {
             <div className="text-3xl font-medium tracking-tight text-fg">Orca</div>
             <p className="max-w-sm text-sm leading-relaxed text-sec">
               Create a Space on the left. Each Space holds pages of working documents. Your AI
-              coworkers (Dots) arrive in Phase 2.
+              coworkers (Agents) arrive in Phase 2.
             </p>
           </div>
         )}
