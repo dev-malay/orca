@@ -160,7 +160,7 @@ export const SearchResponseSchema = z.object({
 
 export type SearchResponse = z.infer<typeof SearchResponseSchema>
 
-// forChat (P3)
+// Chat (Phase 3)
 
 export const ThreadSchema = z.object({
   id: z.string(),
@@ -197,5 +197,52 @@ export const SendMessageInputSchema = z.object({
 
 export type SendMessageInput = z.infer<typeof SendMessageInputSchema>
 
+// Tools (Phase 4)
 
+export const ToolSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  command: z.string(),
+  args: z.string().optional(),
+  createdAt: z.number(),
+  updatedAt: z.number()
+})
+
+export type Tool = z.infer<typeof ToolSchema>
+
+export const CreateToolInputSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  description: z.string().max(1000).optional(),
+  command: z.string().trim().min(1),
+  args: z.string().optional()
+})
+
+export type CreateToolInput = z.infer<typeof CreateToolInputSchema>
+
+export const ToolCallSchema = z.object({
+  id: z.string(),
+  toolId: z.string(),
+  arguments: z.string(),
+  status: z.enum(['pending', 'approved', 'denied', 'executed', 'failed']),
+  result: z.string().optional(),
+  error: z.string().optional(),
+  createdAt: z.number(),
+  updatedAt: z.number()
+})
+
+export type ToolCall = z.infer<typeof ToolCallSchema>
+
+export const CreateToolCallInputSchema = z.object({
+  toolId: z.string().min(1),
+  arguments: z.string().trim().min(1)
+})
+
+export type CreateToolCallInput = z.infer<typeof CreateToolCallInputSchema>
+
+export const ApproveToolCallInputSchema = z.object({
+  approved: z.boolean()
+})
+
+export type ApproveToolCallInput = z.infer<typeof ApproveToolCallInputSchema>
 
