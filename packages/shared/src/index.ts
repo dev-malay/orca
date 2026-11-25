@@ -246,3 +246,21 @@ export const ApproveToolCallInputSchema = z.object({
 
 export type ApproveToolCallInput = z.infer<typeof ApproveToolCallInputSchema>
 
+// Sandbox (Phase 5)
+
+export const SandboxSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  status: z.string(),
+  createdAt: z.number(),
+  updatedAt: z.number()
+})
+
+export type Sandbox = z.infer<typeof SandboxSchema>
+
+export const CreateSandboxInputSchema = z.object({
+  name: z.string().trim().min(1).max(200)
+})
+
+export type CreateSandboxInput = z.infer<typeof CreateSandboxInputSchema>
+
