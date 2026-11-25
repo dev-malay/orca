@@ -64,4 +64,21 @@ export const SearchResponseSchema = z.object({
 
 export type SearchResponse = z.infer<typeof SearchResponseSchema>
 
+// Sandbox (P5)
+
+export const SandboxSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  status: z.string(),
+  createdAt: z.number(),
+  updatedAt: z.number()
+})
+
+export type Sandbox = z.infer<typeof SandboxSchema>
+
+export const CreateSandboxInputSchema = z.object({
+  name: z.string().trim().min(1).max(200)
+})
+
+export type CreateSandboxInput = z.infer<typeof CreateSandboxInputSchema>
 
