@@ -1,7 +1,10 @@
 import { Hono } from 'hono'
 import { spacesRoutes } from './routes/spaces'
 import { pagesRoutes } from './routes/pages'
+import { agentsRoutes } from './routes/agents'
 import { searchRoutes } from './routes/search'
+import { toolsRoutes } from './routes/tools'
+import { mcpRoutes } from './routes/mcp'
 
 const app = new Hono()
 
@@ -16,6 +19,9 @@ app.get('/api/health', (c) => {
 
 app.route('/api/spaces', spacesRoutes)
 app.route('/api/pages', pagesRoutes)
+app.route('/api/agents', agentsRoutes)
 app.route('/api/search', searchRoutes)
+app.route('/api/tools', toolsRoutes)
+app.route('/api/mcp', mcpRoutes)
 
 Bun.serve({port: 8787, fetch: app.fetch})
