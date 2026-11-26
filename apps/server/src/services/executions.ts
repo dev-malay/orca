@@ -81,6 +81,39 @@ export async function executeCommand(sandboxId: string, command: string): Promis
   return { id, sandboxId, command, stdout, stderr, exitCode, createdAt: now }
 }
 
+export async function readFile(sandboxId: string, path: string): Promise<{ content: string } | null> {
+  const sandbox = db.query('SELECT * FROM sandboxes WHERE id = ?').get(sandboxId) as { status: string } | null
+  if (!sandbox) return null
+  if (sandbox.status !== 'running') return null
+  
+  const result = await executeCommand(sandboxId, `cat ${escapeShellArg(path)}`)
+  return result ? { content: result.stdout ?? '' } : null
+}
+
+export async function listDirectory(sandboxId: string, path: string): Promise<{ entries: string[] } | null> {
+  const sandbox = db.query('SELECT * FROM sandboxes WHERE id = ?').get(sandboxId) as { status: string } | null
+  if (!sandbox) return null
+  if (sandbox.status !== 'running') return null
+  const result = await executeCommand(sandboxId, `ls -1a ${escapeShellArg(path)}`)
+  if (!result) return null
+  const entries = (result.stdout ?? '').split('\n').filter((line) => line.length > 0)
+  return { entries }
+}
+
+export async function writeFile(sandboxId: string, path: string, content: string): Promise<{ ok: boolean } | null> {
+  const sandbox = db.query('SELECT * FROM sandboxes WHERE id = ?').get(sandboxId) as { status: string } | null
+  if (!sandbox) return null
+  if (sandbox.status !== 'runnin') return null
+
+  const encoded = Buffer.from(content).toString('base64')
+  const result = await executeCommand(sandboxId, `echo ${escapeShellArg(encoded)} | base64 -d > ${escapeShellArg(path)}`)
+  return result ? { ok: result.exitCode === 0 } : null
+}
+
+function escapeShellArg(arg: string): string {
+  return "'" + arg.replace(/'/g, "'\\''") + "'"
+}
+
 export function getSandbox(id: string): Sandbox | null {
   const row = db.query('SELECT * FROM sandboxes WHERE id = ?').get(id) as SandboxRow | null
   return row ? toSandbox(row) : null

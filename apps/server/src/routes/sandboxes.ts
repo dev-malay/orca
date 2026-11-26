@@ -65,3 +65,49 @@ sandboxesRoutes.get('/:id/executions', (c) => {
 
 })
 
+sandboxesRoutes.get('/:id/files', async (c) => {
+  const sandbox = sandboxes.getSandbox(c.req.param('id'))
+  if (!sandbox) return c.json({ error: 'Sandbox not found.' }, 404)
+  if (sandbox.status !== 'running') {
+    return c.json({ error: 'Sandbox is not running.' }, 400)
+  }
+  const path = c.req.query('path')
+  const op = c.req.query('op') ?? 'read'
+  if (typeof path !== 'string' || path.trim().length === 0) {
+    return c.json({ error: 'Path is required.' }, 400)
+  }
+  if (op === 'list') {
+    const result = await executions.listDirectory(sandbox.id, path.trim())
+    if (!result) return c.json({ error: 'Sandbox not found or not running.' }, 404)
+    return c.json(result)
+  }
+  const result = await executions.readFile(sandbox.id, path.trim())
+  if (!result) return c.json({ error: 'Sandbox not found or not running.' }, 404)
+  return c.json(result)
+})
+
+sandboxesRoutes.post('/:id/files', async (c) => {
+  const sandbox = sandboxes.getSandbox(c.req.param('id'))
+  if (!sandbox) return c.json({ error: 'Sandbox not found.' }, 404)
+  if (sandbox.status !== 'running') {
+    return c.json({ error: 'Sandbox is not running.' }, 400)
+  }
+  const body = await c.req.json().catch(() => null)
+  const path = body?.path
+  const content = body?.content
+
+  if (typeof path !== 'string' || path.trim().length === 0) {
+    return c.json({ error: 'Path is required.' }, 400)
+  }
+
+  if (typeof content !== 'string') {
+    return c.json({ error: 'Content is requireed.' }, 400)
+  }
+  const result = await executions.writeFile(sandbox.id, path.trim(), content)
+  if (!result) return c.json({ error: 'Sandbox not found or not running.' }, 404)
+  return c.json(result, 201)
+})
+
+
+
+
